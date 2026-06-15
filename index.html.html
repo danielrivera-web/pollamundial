@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Polla - Mundial 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+  <header class="bg-emerald-700 text-white p-4 shadow-md flex justify-between items-center">
+    <h1 class="text-xl sm:text-2xl font-bold tracking-wider">🏆 LA POLLA MUNDIAL 2026</h1>
+    <div id="userInfo" class="hidden text-sm flex items-center gap-4">
+      <span>Hola, <strong id="userDisplayName">User</strong></span>
+      <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded transition text-xs font-bold">Salir</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 mt-6">
+    
+    <section id="authSection" class="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md mx-auto">
+      <div id="loginBox">
+        <h2 class="text-xl font-semibold mb-4 text-emerald-400">Iniciar Sesión</h2>
+        <input type="email" id="loginEmail" placeholder="Correo electrónico" class="w-full p-2 mb-3 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-emerald-500">
+        <input type="password" id="loginPass" placeholder="Contraseña" class="w-full p-2 mb-4 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-emerald-500">
+        <button onclick="login()" class="w-full bg-emerald-600 hover:bg-emerald-500 p-2 rounded font-bold transition">Entrar</button>
+        <p class="text-xs text-gray-400 mt-4 text-center">
+          <a href="#" onclick="toggleAuth('register')" class="text-emerald-400 underline">Regístrate aquí</a> | 
+          <a href="#" onclick="toggleAuth('recover')" class="text-emerald-400 underline">¿Olvidaste tu contraseña?</a>
+        </p>
+      </div>
+
+      <div id="registerBox" class="hidden">
+        <h2 class="text-xl font-semibold mb-4 text-emerald-400">Crear Cuenta</h2>
+        <input type="text" id="regName" placeholder="Nombre o Apodo" class="w-full p-2 mb-3 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-emerald-500">
+        <input type="email" id="regEmail" placeholder="Correo electrónico" class="w-full p-2 mb-3 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-emerald-500">
+        <input type="password" id="regPass" placeholder="Contraseña" class="w-full p-2 mb-4 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-emerald-500">
+        <button onclick="register()" class="w-full bg-blue-600 hover:bg-blue-500 p-2 rounded font-bold transition">Registrarme</button>
+        <p class="text-xs text-gray-400 mt-4 text-center">
+          <a href="#" onclick="toggleAuth('login')" class="text-emerald-400 underline">Volver al Login</a>
+        </p>
+      </div>
+
+      <div id="recoverBox" class="hidden">
+        <h2 class="text-xl font-semibold mb-4 text-emerald-400">Recuperar Contraseña</h2>
+        <p class="text-sm text-gray-400 mb-3">Ingresa tu correo y te enviaremos tu clave registrada.</p>
+        <input type="email" id="recoverEmail" placeholder="Tu Correo electrónico" class="w-full p-2 mb-4 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-emerald-500">
+        <button onclick="recoverPassword()" class="w-full bg-yellow-600 hover:bg-yellow-500 p-2 rounded font-bold text-gray-900 transition">Enviar Contraseña</button>
+        <p class="text-xs text-gray-400 mt-4 text-center">
+          <a href="#" onclick="toggleAuth('login')" class="text-emerald-400 underline">Volver al Login</a>
+        </p>
+      </div>
+    </section>
+
+    <section id="gameSection" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      <div class="lg:col-span-2 bg-gray-800 p-4 rounded-lg shadow-lg">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">⚽ Pronosticar Partidos</h2>
+          <span id="refreshBadge" class="text-[10px] bg-gray-700 text-gray-400 px-2 py-0.5 rounded animate-pulse">Autorefresco activo (30s)</span>
+        </div>
+        <div id="partidosContainer" class="space-y-4">
+          <p class="text-gray-400 text-sm">Sincronizando partidos del Mundial 2026...</p>
+        </div>
+      </div>
+
+      <div class="bg-gray-800 p-4 rounded-lg shadow-lg flex flex-col">
+        <h2 class="text-xl font-bold mb-4 text-sky-400 flex items-center gap-2">📂 Mi Historial</h2>
+        <div id="historialContainer" class="space-y-3 overflow-y-auto max-h-[500px]">
+          <p class="text-gray-500 text-xs">No has realizado apuestas evaluadas aún.</p>
+        </div>
+      </div>
+
+      <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold mb-4 text-yellow-400 flex items-center gap-2">⭐ Posiciones</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-gray-300">
+            <thead class="bg-gray-700 text-gray-200 uppercase text-xs">
+              <tr>
+                <th class="p-2">Pos</th>
+                <th class="p-2">Nombre</th>
+                <th class="p-2 text-center">Pts</th>
+              </tr>
+            </thead>
+            <tbody id="rankingBody">
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // URL DE TU ENLACE GOOGLE APPS SCRIPT
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx0tx3IgmpX77DDK1P3wyl8OgnCctr9iKDw4BhyRY2WXMuJQq9Rdncjw7kq-_iSY7dy/exec";
+
+    let usuarioLogueado = JSON.parse(localStorage.getItem("userPolla")) || null;
+    let database = { partidos: [], ranking: [], pronosticos: [] };
+    let refreshInterval = null;
+
+    function toggleAuth(view) {
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("registerBox").classList.add("hidden");
+      document.getElementById("recoverBox").classList.add("hidden");
+      if(view === 'login') document.getElementById("loginBox").classList.remove("hidden");
+      if(view === 'register') document.getElementById("registerBox").classList.remove("hidden");
+      if(view === 'recover') document.getElementById("recoverBox").classList.remove("hidden");
+    }
+
+    function init() {
+      if (usuarioLogueado) {
+        document.getElementById("authSection").classList.add("hidden");
+        document.getElementById("gameSection").classList.remove("hidden");
+        document.getElementById("userInfo").classList.remove("hidden");
+        document.getElementById("userDisplayName").innerText = usuarioLogueado.nombre;
+        
+        // Primera carga manual de datos
+        fetchData();
+
+        // NUEVO: Configura el autorefresh en segundo plano cada 30 segundos de manera limpia
+        if(!refreshInterval) {
+          refreshInterval = setInterval(fetchData, 30000);
+        }
+      } else {
+        document.getElementById("authSection").classList.remove("hidden");
+        document.getElementById("gameSection").classList.add("hidden");
+        document.getElementById("userInfo").classList.add("hidden");
+        
+        if(refreshInterval) {
+          clearInterval(refreshInterval);
+          refreshInterval = null;
+        }
+      }
+    }
+
+    async function fetchData() {
+      try {
+        let response = await fetch(WEB_APP_URL);
+        database = await response.json();
+        
+        // Actualiza las secciones de forma asíncrona sin parpadeos de ventana
+        renderRanking();
+        renderPartidos();
+        renderHistorial();
+        
+        // Destello visual sutil en el indicador de actualización exitosa
+        let badge = document.getElementById("refreshBadge");
+        if(badge) {
+          badge.classList.remove("text-gray-400");
+          badge.classList.add("text-emerald-400");
+          setTimeout(() => {
+            badge.classList.remove("text-emerald-400");
+            badge.classList.add("text-gray-400");
+          }, 1000);
+        }
+      } catch (err) {
+        console.error("Error en autorefresco silencioso:", err);
+      }
+    }
+
+    function renderRanking() {
+      const tbody = document.getElementById("rankingBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      database.ranking.forEach((u, index) => {
+        tbody.innerHTML += `
+          <tr class="border-b border-gray-700 ${u.nombre === usuarioLogueado.nombre ? 'bg-emerald-950 font-bold' : ''}">
+            <td class="p-2">${index + 1}</td>
+            <td class="p-2">${u.nombre}</td>
+            <td class="p-2 text-center text-emerald-400">${u.puntos}</td>
+          </tr>`;
+      });
+    }
+
+    function renderPartidos() {
+      const container = document.getElementById("partidosContainer");
+      if (!container) return;
+
+      if(!database.partidos || database.partidos.length === 0) {
+        container.innerHTML = `<p class="text-gray-500 text-center py-4">No hay partidos disponibles.</p>`;
+        return;
+      }
+
+      const ahora = new Date();
+
+      database.partidos.forEach(p => {
+        // SEGURIDAD ANTI-BORRADO: Si el usuario tiene el cursor metido escribiendo en este partido, saltamos su renderizado para no borrarle lo que escribe
+        let inputLocalActivo = document.getElementById(`gl-${p.id}`);
+        let inputVisitanteActivo = document.getElementById(`gv-${p.id}`);
+        if (document.activeElement === inputLocalActivo || document.activeElement === inputVisitanteActivo) {
+          return; // Conserva el estado actual del input mientras el usuario escribe
+        }
+
+        let pr = database.pronosticos.find(x => x.correo === usuarioLogueado.correo && x.partidoId == p.id);
+        
+        let tieneApuestaPrevia = false;
+        let gLocalUser = "";
+        let gVisitanteUser = "";
+
+        if (pr) {
+          gLocalUser = pr.golesLocal;
+          gVisitanteUser = pr.golesVisitante;
+          tieneApuestaPrevia = true;
+        }
+
+        let partidoFinalizado = (p.golesLocalReal !== undefined && p.golesLocalReal !== null && p.golesLocalReal !== "");
+        let fechaPartido = new Date(p.fecha);
+        let partidoComenzado = (fechaPartido <= ahora);
+        let bloquearCasillas = partidoFinalizado || partidoComenzado || tieneApuestaPrevia;
+
+        let inputsDeshabilitados = bloquearCasillas ? "disabled" : "";
+        let botonGuardar = "";
+
+        if (partidoFinalizado || partidoComenzado) {
+          botonGuardar = `<span class="text-xs text-red-400 bg-red-950/50 px-2 py-1 rounded border border-red-900/50">Cerrado</span>`;
+        } else if (tieneApuestaPrevia) {
+          botonGuardar = `<span class="text-xs text-blue-400 bg-blue-950/50 px-2 py-1 rounded border border-blue-900/50 font-medium">Registrado</span>`;
+        } else {
+          botonGuardar = `<button onclick="guardarPrediccion(${p.id})" class="ml-2 bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-xs font-bold rounded transition text-white">Guardar</button>`;
+        }
+
+        let infoResultadoReal = "";
+        if(partidoFinalizado && p.golesLocalReal !== "") {
+          infoResultadoReal = `<div class="text-xs bg-gray-900 text-yellow-500 font-semibold p-1 px-2 rounded mt-1 inline-block">Resultado Oficial: ${p.golesLocalReal} - ${p.golesVisitanteReal}</div>`;
+        } else if (partidoComenzado) {
+          infoResultadoReal = `<div class="text-xs bg-gray-900 text-gray-400 font-semibold p-1 px-2 rounded mt-1 inline-block">Partido en progreso (Goles Real: ${p.golesLocalReal !== "" ? p.golesLocalReal : 0} - ${p.golesVisitanteReal !== "" ? p.golesVisitanteReal : 0})</div>`;
+        } else if (tieneApuestaPrevia) {
+          infoResultadoReal = `<div class="text-xs bg-gray-900 text-emerald-400 font-semibold p-1 px-2 rounded mt-1 inline-block">Tu pronóstico: ${gLocalUser} - ${gVisitanteUser} 🔒</div>`;
+        }
+
+        let fechaFormateada = fechaPartido.toLocaleString('es-ES', { 
+          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' 
+        });
+
+        // Crear o reemplazar el nodo del partido de manera limpia
+        let partidoDOMId = `card-partido-${p.id}`;
+        let partidoHTML = `
+            <div>
+              <span class="text-xs text-emerald-400 block font-semibold">${fechaFormateada}</span>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="font-bold text-sm sm:text-base">${p.local} vs ${p.visitante}</span>
+              </div>
+              ${infoResultadoReal}
+            </div>
+            <div class="flex items-center gap-2 justify-end">
+              <input type="number" id="gl-${p.id}" value="${gLocalUser}" ${inputsDeshabilitados} min="0" placeholder="0" class="w-12 p-1 bg-gray-800 text-center rounded border border-gray-500 font-bold text-white focus:outline-none focus:border-emerald-400 disabled:opacity-50 disabled:bg-gray-900">
+              <span class="text-gray-400 font-bold">-</span>
+              <input type="number" id="gv-${p.id}" value="${gVisitanteUser}" ${inputsDeshabilitados} min="0" placeholder="0" class="w-12 p-1 bg-gray-800 text-center rounded border border-gray-500 font-bold text-white focus:outline-none focus:border-emerald-400 disabled:opacity-50 disabled:bg-gray-900">
+              ${botonGuardar}
+            </div>`;
+
+        let partidoCard = document.getElementById(partidoDOMId);
+        if(!partidoCard) {
+          partidoCard = document.createElement("div");
+          partidoCard.id = partidoDOMId;
+          container.appendChild(partidoCard);
+        }
+        
+        partidoCard.className = `bg-gray-700/50 p-4 rounded border border-gray-600 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300 ${bloquearCasillas ? 'opacity-75 bg-gray-800/30' : ''}`;
+        partidoCard.innerHTML = partidoHTML;
+      });
+    }
+
+    function renderHistorial() {
+      const container = document.getElementById("historialContainer");
+      if (!container) return;
+
+      let misPronosticos = database.pronosticos.filter(x => x.correo === usuarioLogueado.correo);
+
+      if(misPronosticos.length === 0) {
+        container.innerHTML = `<p class="text-gray-500 text-xs text-center py-4">Aún no has guardado pronósticos en este torneo.</p>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      misPronosticos.forEach(pr => {
+        let p = database.partidos.find(x => x.id == pr.partidoId);
+        if(!p) return;
+
+        let claseColor = "bg-gray-700/30 border-gray-600 text-gray-400";
+        let badgeEstado = "Pendiente";
+
+        if(pr.estado === "ganado") {
+          claseColor = "bg-emerald-950/40 border-emerald-800 text-emerald-300";
+          badgeEstado = "¡Ganado! Exacto (+3 Pts)";
+        } else if(pr.estado === "parcial") {
+          claseColor = "bg-yellow-950/40 border-yellow-800 text-yellow-300";
+          badgeEstado = "Acierto Parcial (+1 Pt)";
+        } else if(pr.estado === "perdido") {
+          claseColor = "bg-red-950/40 border-red-900 text-red-300";
+          badgeEstado = "Errado (0 Pts)";
+        }
+
+        container.innerHTML += `
+          <div class="p-3 rounded border text-xs flex flex-col gap-1 transition-colors duration-500 ${claseColor}">
+            <div class="flex justify-between font-bold">
+              <span>${p.local} vs ${p.visitante}</span>
+              <span class="uppercase text-[10px] tracking-wider px-1.5 py-0.5 rounded bg-black/30">${badgeEstado}</span>
+            </div>
+            <div class="flex justify-between text-gray-400 mt-1">
+              <span>Tu apuesta: <strong>${pr.golesLocal} - ${pr.golesVisitante}</strong></span>
+              <span>Real: <strong>${p.golesLocalReal !== "" ? p.golesLocalReal + ' - ' + p.golesVisitanteReal : 'En Vivo / N/A'}</strong></span>
+            </div>
+          </div>`;
+      });
+    }
+
+    async function guardarPrediccion(partidoId) {
+      let gLocal = document.getElementById(`gl-${partidoId}`).value;
+      let gVisitante = document.getElementById(`gv-${partidoId}`).value;
+
+      if(gLocal === "" || gVisitante === "") {
+        alert("Por favor ingresa ambos marcadores.");
+        return;
+      }
+
+      if(!confirm("¿Estás seguro de este marcador? Una vez guardado no podrás modificarlo.")) {
+        return;
+      }
+
+      let payload = {
+        action: "guardarPronostico",
+        correo: usuarioLogueado.correo,
+        partidoId: partidoId,
+        golesLocal: parseInt(gLocal),
+        golesVisitante: parseInt(gVisitante)
+      };
+
+      try {
+        let response = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+        let result = await response.json();
+        if(result.success) {
+          alert("¡Pronóstico guardado exitosamente!");
+          fetchData();
+        }
+      } catch(err) {
+        alert("Ocurrió un error al enviar el pronóstico.");
+      }
+    }
+
+    async function login() {
+      let correo = document.getElementById("loginEmail").value;
+      let clave = document.getElementById("loginPass").value;
+      if(!correo || !clave) return alert("Completa todos los campos");
+
+      try {
+        let response = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "login", correo, clave }) });
+        let res = await response.json();
+        if(res.success) {
+          usuarioLogueado = { correo: res.correo, nombre: res.nombre };
+          localStorage.setItem("userPolla", JSON.stringify(usuarioLogueado));
+          init();
+        } else {
+          alert(res.message);
+        }
+      } catch(e) { alert("Error de servidor."); }
+    }
+
+    async function register() {
+      let nombre = document.getElementById("regName").value;
+      let correo = document.getElementById("regEmail").value;
+      let clave = document.getElementById("regPass").value;
+      if(!nombre || !correo || !clave) return alert("Completa todos los campos");
+
+      try {
+        let response = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "register", nombre, correo, clave }) });
+        let res = await response.json();
+        if(res.success) { alert("Registro exitoso."); toggleAuth('login'); } else { alert(res.message); }
+      } catch(e) { alert("Error de registro."); }
+    }
+
+    async function recoverPassword() {
+      let correo = document.getElementById("recoverEmail").value;
+      if(!correo) return alert("Por favor escribe tu correo");
+      try {
+        let response = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action: "recover", correo }) });
+        let res = await response.json(); alert(res.message);
+      } catch(e) { alert("Error en el envío."); }
+    }
+
+    function logout() {
+      if(refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+      }
+      localStorage.removeItem("userPolla");
+      usuarioLogueado = null;
+      init();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
